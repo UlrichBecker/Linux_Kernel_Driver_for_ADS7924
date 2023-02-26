@@ -8,6 +8,19 @@ To optain a detiled description about this module you need [Doxygen](https://www
 2) Call ```doxygen```
 3) Open the file ```./doc/html/index.html``` with your preferred web browser.
 
+Apperring the drivers device-files in the directory ```/dev```:
+```
+adc<0-n><A-B>[0-3]
+ |   |    |    |
+ |   |    |    +- Channel number
+ |   |    +------ I2C-address (chip-number) A = 0x48; B = 0x49
+ |   +----------- Number of I2C-bus
+ +--------------- Prefix
+
+```
+Where ```adc<0-n><A-B>``` is the interface for registers which concerns the whole chip,
+and ```adc<0-n><A-B>[0-3]``` one of the four channels.
+
 In the directory ```./src/test``` you can find the source code for a demo- and test- application to compile it you need additently the command line-parser which you can [obtain here](https://github.com/UlrichBecker/command_line_option_parser).
 
 [Another helpful tool for developing Linux drivers can be found here.](https://github.com/UlrichBecker/ioctl4bash)
