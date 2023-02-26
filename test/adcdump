@@ -1,0 +1,38 @@
+#!/bin/sh
+
+ADDRESS="0x48"
+
+FIRST="0x02"
+LAST="0x09"
+
+gotoxy()
+{
+   echo -e "\033[${2};${1}H"
+}
+
+./i2cset -y 0 ${ADDRESS} "0x16" "0xAA"
+if [ "${?}" != "0" ]
+then
+   exit 1
+fi
+
+usleep 500000
+
+./i2cset -y 0 ${ADDRESS} "0x00" "0xCC"
+if [ "${?}" != "0" ]
+then
+   exit 1
+fi
+
+clear
+
+while true
+do
+   usleep 500000
+   gotoxy 1 1
+   ./i2cdump -y -r ${FIRST}-${LAST}  0 ${ADDRESS}
+   if [ "${?}" != "0" ]
+   then
+      break
+   fi
+done

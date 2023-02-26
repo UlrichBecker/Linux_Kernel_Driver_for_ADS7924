@@ -1,0 +1,133 @@
+/*
+ * Copyright 2016 MSC technologies GmbH
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+/*!
+ * @brief Device-tree with integrating of the section for ADS7924
+ * @see ads7924_dev_tree_names.h
+ */
+/dts-v1/;
+
+#include <ads7924_dev_tree_names.h>
+#include "msc-nR-imx6-143-014.dtsi"
+
+/ {
+#if 0
+    sound {
+		status = "okay";
+		compatible = "fsl,imx-audio-ssm2518";
+		model = "imx-ssm2518";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_codec>;
+		ssi-controller = <&ssi1>;
+		audio-codec = <&ssm2518>;
+		mux-int-port = <1>;
+		mux-ext-port = <3>;
+		audio-routing =
+		/*	<sink>,			<source>*/
+			"Speaker",	"OUTL",
+			"Speaker",	"OUTR";
+	};
+#endif
+};
+
+&mxcfb1 {
+	compatible = "fsl,mxc_sdc_fb";
+	disp_dev = "lcd";
+	interface_pix_fmt = "RGB24";
+	mode_str ="EMERGING-WVGA";
+	default_bpp = <32>;
+	int_clk = <0>;
+	late_init = <0>;
+	status = "okay";
+};
+
+&lcd_panel {
+	status = "okay";
+};
+
+&pwm1 {
+	status = "okay";
+};
+
+&lcd_bl {
+	status = "okay";
+	pwms = <&pwm1 0 1000000>; /*1kHz*/
+	default-brightness-level = <3>;
+};
+
+&i2c1 {
+	status = "okay";
+
+	polytouch: edt-ft5x06@38 {
+		compatible = "edt,edt-ft5x06"; /* i2c_device_id */
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_edt_ft5x06>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <4 2>;
+		reset-gpios = <&gpio1 29 GPIO_ACTIVE_LOW>;
+		touchscreen-size-x = <1792>;
+		touchscreen-size-y = <1024>;
+		touchscreen-fuzz-x = <3>;
+		touchscreen-fuzz-y = <3>;
+		status = "okay";
+	};
+#if 0
+	ssm2518: ssm2518@34 {
+		compatible = "adi,ssm2518";
+		reg = <0x34>; /*ADDR pin low*/
+		clocks = <&clks IMX6QDL_CLK_CKO>;
+		status = "okay";
+	};
+#endif
+};
+
+&ssi1 {
+	status = "okay";
+};
+
+&iomuxc {
+	touch {
+		pinctrl_edt_ft5x06: edt-ft5x06grp {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x1b0b1 /*irq*/
+				MX6QDL_PAD_ENET_TXD1__GPIO1_IO29	0x1b0b1 /*rst*/
+			>;
+		};
+	};
+#if 0
+	codec {
+		pinctrl_codec: codecgrp {
+			fsl,pins = <
+				MX6QDL_PAD_CSI0_MCLK__CCM_CLKO1		0x130b0
+			>;
+		};
+	};
+#endif
+};
+
+&i2c1 {
+   #address-cells = <0x1>;
+   #size-cells = <0x0>;
+
+   status = "okay";
+
+   ads7924: ads7924@48 {
+
+      compatible = ADS7924_DT_COMPATIBLE;
+      reg = <0x48>;
+     // alarm_input_gpio = <&gpio3 18 GPIO_ACTIVE_LOW>;
+      interrupt-parent = <&gpio3>;
+      interrupts = <18 IRQ_TYPE_EDGE_FALLING>;
+      ADS7924_CHANNEL( 0 );
+      ADS7924_CHANNEL( 1 );
+      status = "okay";
+   };
+};

@@ -1,0 +1,120 @@
+#!/bin/sh
+
+VERBOSE="-v"
+
+ULR0="0x01"
+LLR0="0x02"
+ULR1="0x03"
+LLR1="0x04"
+
+I2C_BUS='0'
+CHIP='A'
+
+PROC_FILE="/proc/driver/adc"
+DEV_FILE="/dev/adc${I2C_BUS}${CHIP}"
+DEV_FILE0="/dev/adc${I2C_BUS}${CHIP}0"
+DEV_FILE1="/dev/adc${I2C_BUS}${CHIP}1"
+DEV_FILE2="/dev/adc${I2C_BUS}${CHIP}2"
+DEV_FILE3="/dev/adc${I2C_BUS}${CHIP}3"
+
+ADS7924_IOCTL_RESET=$(cat $PROC_FILE | grep ADS7924_IOCTL_RESET | awk -F':' '{print $1}')
+ADS7924_IOCTL_SET_MODE=$(cat $PROC_FILE | grep ADS7924_IOCTL_SET_MODE | awk -F':' '{print $1}')
+ADS7924_MODE_AUTO_SCAN=$(cat $PROC_FILE | grep -m1 ADS7924_MODE_AUTO_SCAN | awk -F':' '{print $1}')
+ADS7924_IOCTL_SET_SLPCONFIG=$(cat $PROC_FILE | grep ADS7924_IOCTL_SET_SLPCONFIG | awk -F':' '{print $1}')
+
+
+ADS7924_IOCTL_SET_ULR=$(cat $PROC_FILE | grep ADS7924_IOCTL_SET_ULR | awk -F':' '{print $1}')
+ADS7924_IOCTL_SET_LLR=$(cat $PROC_FILE | grep ADS7924_IOCTL_SET_LLR | awk -F':' '{print $1}')
+
+
+
+gotoxy()
+{
+   echo -e "\033[${2};${1}H"
+}
+
+
+setUlr()
+{
+   ioctl $VERBOSE "${DEV_FILE}${1}" ${ADS7924_IOCTL_SET_ULR} ${2}
+   if [ "$?" != "0" ]
+   then
+      echo "Error!" 1>&2
+      exit 1
+   fi
+}
+
+setLlr()
+{
+   ioctl $VERBOSE "${DEV_FILE}${1}" ${ADS7924_IOCTL_SET_LLR} ${2}
+   if [ "$?" != "0" ]
+   then
+      echo "Error!" 1>&2
+      exit 1
+   fi
+}
+
+reset()
+{
+   ioctl $VERBOSE $DEV_FILE $ADS7924_IOCTL_RESET
+   if [ "$?" == "0" ]
+   then
+      echo "*** Chip reseted ***"
+      usleep 500000
+   else
+      echo "Error!" 1>&2
+      exit 1
+   fi
+}
+
+setSlpConfig()
+{
+   ioctl $VERBOSE $DEV_FILE $ADS7924_IOCTL_SET_SLPCONFIG "0x03"
+}
+
+start()
+{
+   #ioctl $VERBOSE $DEV_FILE $ADS7924_IOCTL_SET_MODE $ADS7924_MODE_AUTO_SCAN
+   ioctl $VERBOSE $DEV_FILE $ADS7924_IOCTL_SET_MODE "0xEC"
+   if [ "$?" != "0" ]
+   then
+      echo "Error!" 1>&2
+      exit 1
+   fi
+}
+
+
+loop()
+{
+   clear
+   while true
+   do
+      usleep 250000
+      gotoxy 1 1
+      for i in '0' '1' '2' '3'
+      do
+         local adcDev="${DEV_FILE}${i}"
+         if [ -c "$adcDev" ]
+         then
+            echo "${adcDev}: 0x$(cat $adcDev)"
+         fi
+      done
+   done
+}
+
+
+reset
+
+setUlr 0 $ULR0
+setUlr 1 $ULR1
+setLlr 0 $LLR0
+setLlr 1 $LLR1
+
+start
+
+setSlpConfig
+
+loop
+
+
+

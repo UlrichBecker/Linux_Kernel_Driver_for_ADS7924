@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -n "$(lsmod | grep "$(echo "$1" | awk -F. '{print $1}' )")" ]
+then
+   rmmod $1
+   sleep 1
+fi
+insmod $1

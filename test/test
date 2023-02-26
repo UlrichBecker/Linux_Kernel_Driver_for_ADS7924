@@ -1,0 +1,9 @@
+#!/bin/sh
+
+DRIVER=adc.ko
+
+if [ ! -n "$(lsmod | grep "$(echo "$DRIVER" | awk -F. '{print $1}' )")" ]
+then
+   insmod $DRIVER
+fi
+./palmtest

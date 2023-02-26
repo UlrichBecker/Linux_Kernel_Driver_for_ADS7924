@@ -1,0 +1,2 @@
+#!/bin/sh
+ioctl -v /dev/adc0A $(cat /proc/driver/adc | grep ADS7924_IOCTL_RESET | awk -F':' '{print $1}')

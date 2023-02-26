@@ -1,0 +1,226 @@
+#//////////////////////////////////////////////////////////////////////////////
+#/ Name:        driver/misc/ads7924/kconfig
+#/ Purpose:     Kernel configuration for driver of AD-Converter ADS7924
+#/ Author:      Ulrich Becker
+#/ Modified by:
+#/ Created:     2017.05.10
+#/ Copyright:   www.INKATRON.de
+#//////////////////////////////////////////////////////////////////////////////
+
+
+menu "Analog to digital converter ADS7924"
+
+config ADS7924
+   tristate "Driver for analog to digital converter I2C-slave ADS7924"
+   default y
+   select I2C
+   help
+      I2C slave driver for analog to digital converter chip ADS7924.
+      The user interface will be represented the folder /dev/.
+      in which /dev/adc[0-n][A-B] represents the interface for the entire chip
+      and /dev/adc[0-n][A-B][0-3] for one of the maximum 4 analog channels per chip.
+      The first number [0-n] is the number of the I2C bus which the chip is connected.
+      The following letter (A or B) represents the I2C slave address by which
+      the chip can be addressed. There only two chips per I2C-bus possible:
+      "A" is I2C-address 0x48 and "B" is I2C-address 0x49.
+      E.g.: "/dev/adc1A2" means: Analog-channel 2 of chip with slave-address
+      0x48 on I2C-bus 1 connected.
+
+if ADS7924
+
+config ADS7924_SHOW_IOCTL_COMMANDS_IN_PROC_FS
+   bool "Shows the possible commands for user function ioctl in the process file system."
+   default y
+   depends on PROC_FS
+   help
+      Shows the command-macros and its related hex-numbers for ioctl() in
+      the process file-system.
+      E.g.: cat /proc/driver/adc
+      This feature can be very helpful for non C/C++ programing languages in which
+      it's impossible to include the C-headder-file ads7924ioctl.h.
+
+      If unsure, say Y.
+
+config ADS7924_DEFAULT_OUTPUT_FORMAT
+   int "Default output format: binary, ASCII decimal or ASCII hexadecimal"
+   range 0 2
+   default 0
+   help
+     Determines the output-format of analog-values:
+     0: Output in binary format.
+     1: Output in ASCII decimal.
+     2: Output in ASCII hexadecimal.
+     The Output-format can be changed for each channel during the runtime
+     by the accordingly ioctl-commands.
+
+config DEBUG_ADS7924
+   bool "Shows additional debug messages"
+   default n
+   help
+      Helpful for developing this kernel-module or to find possible bugs.
+      The debug messages can be made visible by typing:
+      tail -f /var/log/messages
+
+      or by systemd:
+      dmsg -w
+
+      If unsure, say n.
+
+config ADS7924_NO_DEV_TREE
+    bool "This module doesn't use the device-tree."
+    default n
+ #   depends on OF
+    help
+       Device-tree will not used!
+
+       If unsure, say n
+
+if ADS7924_NO_DEV_TREE
+
+config ADS7924_INTERRUPT_GPIO
+   int "Input Linux GPIO-number for alarm-cases of ADS7924"
+   default 82
+#   depends on GPIO
+   help
+      Linux-GPIO-number of input which shall trigger a interrupt in the case of
+      a ADS7924 alarm.
+
+      The Linux-GPIO-number will calculated as follow:
+      Linux-GPIO := (GPIO_Bank-number - 1) * 32 + native-GPIO-Number;
+      GPIO_Bank-number >= 1
+
+config ADS7924_USE_0A0
+    bool "ADC-channel adc0A0 will be used"
+    default y
+
+config ADS7924_USE_0A1
+    bool "ADC-channel adc0A1 will be used"
+    default y
+
+config ADS7924_USE_0A2
+    bool "ADC-channel adc0A2 will be used"
+    default n
+
+config ADS7924_USE_0A3
+    bool "ADC-channel adc0A3 will be used"
+    default n
+
+
+config ADS7924_USE_0B0
+    bool "ADC-channel adc0B0 will be used"
+    default n
+
+config ADS7924_USE_0B1
+    bool "ADC-channel adc0B1 will be used"
+    default n
+
+config ADS7924_USE_0B2
+    bool "ADC-channel adc0B2 will be used"
+    default n
+
+config ADS7924_USE_0B3
+    bool "ADC-channel adc0B3 will be used"
+    default n
+
+
+config ADS7924_USE_1A0
+    bool "ADC-channel adc1A0 will be used"
+    default n
+
+config ADS7924_USE_1A1
+    bool "ADC-channel adc1A1 will be used"
+    default n
+
+config ADS7924_USE_1A2
+    bool "ADC-channel adc1A2 will be used"
+    default n
+
+config ADS7924_USE_1A3
+    bool "ADC-channel adc1A3 will be used"
+    default n
+
+config ADS7924_USE_1B0
+    bool "ADC-channel adc1B0 will be used"
+    default n
+
+config ADS7924_USE_1B1
+    bool "ADC-channel adc1B1 will be used"
+    default n
+
+config ADS7924_USE_1B2
+    bool "ADC-channel adc1B2 will be used"
+    default n
+
+config ADS7924_USE_1B3
+    bool "ADC-channel adc1B3 will be used"
+    default n
+
+config ADS7924_USE_2A0
+    bool "ADC-channel adc2A0 will be used"
+    default n
+
+config ADS7924_USE_2A1
+    bool "ADC-channel adc2A1 will be used"
+    default n
+
+config ADS7924_USE_2A2
+    bool "ADC-channel adc2A2 will be used"
+    default n
+
+config ADS7924_USE_2A3
+    bool "ADC-channel adc2A3 will be used"
+    default n
+
+config ADS7924_USE_2B0
+    bool "ADC-channel adc2B0 will be used"
+    default n
+
+config ADS7924_USE_2B1
+    bool "ADC-channel adc2B1 will be used"
+    default n
+
+config ADS7924_USE_2B2
+    bool "ADC-channel adc2B2 will be used"
+    default n
+
+config ADS7924_USE_2B3
+    bool "ADC-channel adc2B3 will be used"
+    default n
+
+config ADS7924_USE_3A0
+    bool "ADC-channel adc3A0 will be used"
+    default n
+
+config ADS7924_USE_3A1
+    bool "ADC-channel adc3A1 will be used"
+    default n
+
+config ADS7924_USE_3A2
+    bool "ADC-channel adc3A2 will be used"
+    default n
+
+config ADS7924_USE_3A3
+    bool "ADC-channel adc3A3 will be used"
+    default n
+
+config ADS7924_USE_3B0
+    bool "ADC-channel adc3B0 will be used"
+    default n
+
+config ADS7924_USE_3B1
+    bool "ADC-channel adc3B1 will be used"
+    default n
+
+config ADS7924_USE_3B2
+    bool "ADC-channel adc3B2 will be used"
+    default n
+
+config ADS7924_USE_3B3
+    bool "ADC-channel adc3B3 will be used"
+    default n
+
+
+endif # if ADS7924_NO_DEV_TREE
+endif # if ADS7924
+endmenu
+#=================================== EOF ======================================

@@ -1,0 +1,190 @@
+/*!
+@page MAIN_PAGE Readme!
+@see https://www.ti.com/product/ADS7924
+@section COMPILING Compiling of the kernelmodule for analg to digital converter ADS7924
+
+1) Make a symbolic link named "linux" to the linux-source-tree in the source
+ directory for this module.
+
+2) Type
+@code
+make all
+@endcode
+
+The command
+@code
+make blob
+@endcode
+compiles the associated device-tree.
+
+If you will test this module in a target device, 
+so the "Makefile" can perform a SSH-connection to it.
+In this case you need the IP-address of the target device.
+This IP-Address must be in a ASCII-textfile named "target.ip".\n
+Example:
+@code
+cat target.ip 
+172.16.244.39
+@endcode
+
+The target folder in the target-device is determined by the makefile-variable
+"TARGET_DEVICE_DIR".\n
+At the moment the target folder is:
+@code
+TARGET_DEVICE_DIR ?= /data
+@endcode
+and the target user is:
+@code
+TARGET_DEVICE_USER ?= root
+@endcode
+
+The command
+@code
+make scp
+@endcode
+will compile and copy the module to the target.\n
+The command
+@code
+make scpblob
+@endcode
+will compile the device-tree and copy it to
+@code
+TARGET_DEVICE_BLOB_DIR ?= /boot
+@endcode
+
+@section KERNEL_BUILD_IN Making a static kernel-build in
+
+The destination folder in the kernel source tree is determined by
+the makefile-variable "REL_BUILD_IN_DIR".\n
+Its value is at the moment:
+@code
+REL_BUILD_IN_DIR := drivers/misc
+@endcode
+
+The command
+@code
+make patch
+@endcode
+makes a symbolic link of all source files belonging to the ADS7924 kernel-module,
+in the target-folder, defined in REL_BUILD_IN_DIR.\n
+Further the makefile manipulates the Makefile and Kconfig of the parent folder
+and saves both origin files in the same parent folder by appending the
+extention ".adc.origin".\n
+
+The command
+@code
+make unpatch
+@endcode
+makes all the above named things undone.\n
+
+@section DEVICE_TREE Device-tree
+The code section of the device tree is explained in the detailed description of
+{@link ads7924_dev_tree_names.h } \n
+
+@section NAME_CONVENTION Name convention of the device-files.
+The device-files of the analog to digital converter appears in the folder "/dev":
+@code
+adc<0-n><A-B>[0-3]
+ |   |    |    |
+ |   |    |    +- Channel number
+ |   |    +------ I2C-address (chip-number) A = 0x48; B = 0x49
+ |   +----------- Number of I2C-bus
+ +--------------- Prefix
+@endcode
+The prefix is determined by the makefile-variable
+@code
+DRIVER_NAME := adc
+@endcode
+and can be changed if necessary.\n
+
+example:
+@code
+root@linux:~# ls /dev/adc*
+/dev/adc0A   /dev/adc0A0  /dev/adc0A1
+@endcode
+The first file without the channel-number is for IO-control-commands which
+concerns the entire chip, e.g.: Chip-Reset
+@see IOCTL_CHIP
+
+The number of analog-channels - in the example above only two - depends
+on the device-tree property:
+@code
+channel<0-3>
+@endcode
+This is explained in the detailed description of {@link ads7924_dev_tree_names.h } \n
+
+@section PROC_FILESYSTEM Representation in the process-file system
+Example:
+@code
+root@cubis-1588ac:~# cat /proc/driver/adc 
+adc Version: 1.0
+Possible modes:
+ 0x00: ADS7924_MODE_IDLE
+ 0x80: ADS7924_MODE_AWAKE
+ 0xC0: ADS7924_MODE_MANUAL_SINGLE
+ 0xC8: ADS7924_MODE_MANUAL_SCAN
+ 0xC4: ADS7924_MODE_AUTO_SINGLE
+ 0xCC: ADS7924_MODE_AUTO_SCAN
+ 0xE4: ADS7924_MODE_AUTO_SINGLE_SLEEP
+ 0xEC: ADS7924_MODE_AUTO_SCAN_SLEEP
+ 0xFC: ADS7924_MODE_AUTO_BURST_SCAN_SLEEP
+
+Valid commands for ioctl() for entire chip access:
+ 0x00006100:   ADS7924_IOCTL_RESET
+ 0x40016101:   ADS7924_IOCTL_SET_MODE
+ 0x80016102:   ADS7924_IOCTL_GET_MODE
+ 0x40016103:   ADS7924_IOCTL_SET_INTCONFIG
+ 0x80016104:   ADS7924_IOCTL_GET_INTCONFIG
+ 0x40026105:   ADS7924_IOCTL_EDIT_INTCONFIG
+ 0x40016106:   ADS7924_IOCTL_SET_SLPCONFIG
+ 0x80016107:   ADS7924_IOCTL_GET_SLPCONFIG
+ 0x40026108:   ADS7924_IOCTL_EDIT_SLPCONFIG
+ 0x40016109:   ADS7924_IOCTL_SET_ACQCONFIG
+ 0x8001610A:   ADS7924_IOCTL_GET_ACQCONFIG
+ 0x4002610B:   ADS7924_IOCTL_EDIT_ACQCONFIG
+ 0x4001610C:   ADS7924_IOCTL_SET_PWRCONFIG
+ 0x8001610D:   ADS7924_IOCTL_GET_PWRCONFIG
+ 0x4002610E:   ADS7924_IOCTL_EDIT_PWRCONFIG
+
+Valid commands for ioctl() for single channel access:
+ 0x0000611E:   ADS7924_IOCTL_READMODE_BIN
+ 0x0000611F:   ADS7924_IOCTL_READMODE_DEC
+ 0x00006120:   ADS7924_IOCTL_READMODE_HEX
+ 0x40016121:   ADS7924_IOCTL_SET_ULR
+ 0x40016122:   ADS7924_IOCTL_SET_LLR
+ 0x80016123:   ADS7924_IOCTL_GET_ULR
+ 0x80016124:   ADS7924_IOCTL_GET_LLR
+ 0x00006125:   ADS7924_IOCTL_ALARM_ENABLE
+ 0x00006126:   ADS7924_IOCTL_ALARM_DISABLE
+
+I2C-bus number: 0
+   adc0A:
+      I2C-Address: 0x48
+      Interrupt-number: 121
+      Open-count: 1
+      MODECNTRL: 0xEC, ADS7924_MODE_AUTO_SCAN_SLEEP
+      INTCNTRL:  0xC0, 11000000
+      INTCONFIG: 0x20, 00100000
+      SLPCONFIG: 0x03, 00000011
+      ACQCONFIG: 0x00, 00000000
+      PWRCONFIG: 0x00, 00000000
+      adc0A0:
+         Open-count: 1
+         Readmode: OUT_BIN
+         ULR0: 0xFF
+         LLR0: 0xC4
+      adc0A1:
+         Open-count: 1
+         Readmode: OUT_BIN
+         ULR1: 0xFF
+         LLR1: 0xC3
+@endcode
+The listing of the IOCTL-commands can be disabled by setting the
+compiler-switch
+@code
+CONFIG_ADS7924_SHOW_IOCTL_COMMANDS_IN_PROC_FS=N
+@endcode
+in the Linux-build-system.
+
+*/
+/*================================== EOF ====================================*/
