@@ -142,9 +142,9 @@ else
 # Invoke of the kernels master-makefile.
 all: checkKernelDir status # $(BLOB_NAME)
 ifdef CROSS_COMPILE
-	@$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNEL_SRC_DIR) SUBDIRS=$(PWD) EXTERN=1 modules
+	@$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNEL_SRC_DIR) M=$(PWD) EXTERN=1 modules
 else
-	@$(MAKE) -C $(KERNEL_SRC_DIR) SUBDIRS=$(PWD) EXTERN=1 modules
+	@$(MAKE) -C $(KERNEL_SRC_DIR) M=$(PWD) EXTERN=1 modules
 endif
 
 .PHONY: blob
