@@ -175,7 +175,13 @@ ssize_t _readAdcRegister( struct i2c_client* poI2cClient, u8 address, void* pDat
 ssize_t _writeAdcRegister( struct i2c_client* poI2cClient, u8 address, void* const pData, size_t size )
 {
    ssize_t ret;
-   u8 buffer[size + sizeof( address )];
+
+   u8* buffer = kmalloc( size + sizeof( address ), GFP_KERNEL );
+   if( buffer == NULL )
+   {
+      ERROR_MESSAGE( "kmalloc failed!" );
+      return -1;
+   }
 
    BUG_ON( poI2cClient == NULL );
    BUG_ON( size == 0 );
@@ -192,6 +198,7 @@ ssize_t _writeAdcRegister( struct i2c_client* poI2cClient, u8 address, void* con
       ERROR_MESSAGE( "Unable to send %d bytes to ADS7924 register %s\n",
                      size, getRegisterName( address ) );
 
+   kfree( buffer );
    return ret;
 }
 

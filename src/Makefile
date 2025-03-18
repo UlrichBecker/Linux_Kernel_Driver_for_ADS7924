@@ -103,6 +103,8 @@ ifdef KERNELRELEASE
    else
       __SOURCES__ = $(notdir $(SOURCES))
    endif
+   EXTRA_CFLAGS += -std=gnu99
+   EXTRA_CFLAGS += -Wfatal-errors
    EXTRA_CFLAGS += $(addprefix -D, $(DEFINES))
    obj-$(CONFIG_ADS7924) += $(DRIVER_NAME).o
    $(DRIVER_NAME)-objs := $(patsubst %.c, %.o, $(__SOURCES__))
@@ -243,7 +245,7 @@ unpatch: checkKernelDir
 clean:
 	rm -f *.mod.c *.o *.ko modules.order Module.symvers .*.cmd .tmp_versions/*
 	rm -f dts/*.dtb* $(COMMON_SRC_DIR)*.o $(COMMON_SRC_DIR).*.cmd
-	rm -f dts/*.tmp
+	rm -f dts/*.tmp $(DRIVER_NAME).mod *.dts.tmp
 	rmdir .tmp_versions
 
 status:
